@@ -118,11 +118,9 @@ class AuxiliaryForecaster(torch.nn.Module):
         # [batch, horizon, output_size]
         if self.rnn_mode == "LSTM":
             _, (h_n, c_n) = self.forecaster_rnn(x.float(), state)
-            h_n = h_n[-1]
         else:
             _, h_n = self.forecaster_rnn(x.float(), h_0)
             c_n = None
-            h_n = h_n[-1]
 
         out = self.forecaster_out(h_n).reshape(-1, self.horizon, self.output_size)
 
