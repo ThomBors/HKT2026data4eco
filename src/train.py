@@ -7,10 +7,10 @@ from data.dataloader import get_splits
 from utils.perfomance import evaluate_cfrnn_performance, predict_on_test,save_predictions_csv
 
 DEFAULT_PARAMETERS = {
-    "batch_size": 256,
-    "embedding_size": 80,
+    "batch_size": 128,
+    "embedding_size": 256,
     "coverage": 0.9,
-    "lr": 0.01,
+    "lr": 0.001,
     "n_steps": 1000,
     "input_size": 125,
     "output_size": 1,
@@ -22,7 +22,7 @@ DEFAULT_PARAMETERS = {
 def run_experiments(params=None, save_model=True, save_results=True, seed=42):
        
     horizon = 1
-    length = 96
+    length = 48
 
     # Parameters
     params = DEFAULT_PARAMETERS.copy() if params is None else params

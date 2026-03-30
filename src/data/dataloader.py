@@ -103,8 +103,8 @@ def get_splits(
     length=100,
     horizon=50,
     n_train=200,
-    n_val=96,
-    n_calibration=100,
+    n_val=168,
+    n_calibration=168,
     seed=None
 ):
     df, df_weather, _, df_weather_test = TimeSeriesDataset.get_raw_data()
