@@ -87,16 +87,17 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
         # -------------------------------
         # 3️⃣ Split into train/test based on production availability
         # -------------------------------
+
         train_index = df['Pcor'].dropna().index
         test_index = df['Pcor'].isna().index
 
         df_train = df.loc[train_index]
-        df_test = df.loc[test_index]
 
         df_weather_train = df_weather_wide.loc[train_index.intersection(df_weather_wide.index)]
-        df_weather_test = df_weather_wide.loc[test_index.intersection(df_weather_wide.index)]
+        df_weather_test = df_weather_wide[df_weather_wide.index >= "2025-06-30"]
+       
 
-        return df_train, df_weather_train, df_test, df_weather_test
+        return df_train, df_weather_train, None, df_weather_test
 
 
 def get_splits(
