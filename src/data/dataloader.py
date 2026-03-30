@@ -91,12 +91,11 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
         test_index = df['Pcor'].isna().index
 
         df_train = df.loc[train_index]
-        df_test = df.loc[test_index]
 
         df_weather_train = df_weather_wide.loc[train_index.intersection(df_weather_wide.index)]
-        df_weather_test = df_weather_wide.loc[test_index.intersection(df_weather_wide.index)]
+        df_weather_test = df_weather.loc[df_weather.index > "30-06-2025"]
 
-        return df_train, df_weather_train, df_test, df_weather_test
+        return df_train, df_weather_train, df_weather_test
 
 
 def get_splits(
