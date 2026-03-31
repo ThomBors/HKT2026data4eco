@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
 import torch
+from tqdm import trange
 
 from enviorment import Environment
-from agent import Agent
-
+from agent import Agent  # assumes agent.py has the CUDA-ready Agent
 
 # -----------------------------
 # LOAD YOUR DATA
@@ -50,14 +50,12 @@ action_dim = len(bins)
 agent = Agent(state_dim, action_dim)
 
 # -----------------------------
-# TRAINING
+# TRAINING WITH TQDM
 # -----------------------------
 episodes = 10
+print('Start training...')
 
-print('start training')
-
-for ep in range(episodes):
-
+for ep in trange(episodes, desc="Episodes"):
     state = env.reset()
     total_reward = 0
     done = False
@@ -74,11 +72,9 @@ for ep in range(episodes):
 
     agent.update_target()
 
-    print(f"Episode {ep} | Reward: {total_reward:.2f} | Epsilon: {agent.epsilon:.3f}")
-
 
 # -----------------------------
-# VALIDATION (optional but useful)
+# VALIDATION (optional)
 # -----------------------------
 val_env = Environment(df_val_split, feature_cols, bins)
 
@@ -89,15 +85,13 @@ val_reward = 0
 while not done:
     action = agent.act(state)  # greedy-ish (epsilon low)
     next_state, reward, done = val_env.step(action)
-
     state = next_state
     val_reward += reward
 
 print(f"\nValidation Reward: {val_reward:.2f}")
 
-
 # -----------------------------
-# TEST PREDICTION (KEY PART)
+# TEST PREDICTION
 # -----------------------------
 test_env = Environment(df_test_split, feature_cols, bins)
 
@@ -105,40 +99,39 @@ state = test_env.reset()
 done = False
 
 predictions = []
-real_values = []
+dates = []
 
 while not done:
-
     action = agent.act(state)
 
-    # get current real production
+    # current date
+    current_date = test_env.df.index[test_env.t]
+
+    # current real production
     p_t = test_env.df.loc[test_env.t, 'Pcor']
     delta = bins[action]
 
     # predicted next production
     p_pred = p_t + delta
 
-    # store prediction
     predictions.append(p_pred)
-
-    # real value (if exists)
-    if test_env.t + 1 < len(test_env.df):
-        real = test_env.df.loc[test_env.t + 1, 'Pcor']
-        real_values.append(real)
+    dates.append(current_date)
 
     state, reward, done = test_env.step(action)
 
-
 # -----------------------------
-# RESULTS
+# RESULTS CSV
 # -----------------------------
-predictions = np.array(predictions)
-real_values = np.array(real_values[:len(predictions)])
+df_results = pd.DataFrame({
+    'date': dates,
+    'P_pred': predictions
+})
 
-print("\nTest predictions (first 10):")
-print(predictions[:10])
+df_results.to_csv("production_results.csv", index=False)
+print("\nCSV file 'production_results.csv' created successfully!")
 
-# simple metric
+# optional: compare with real values if available
+real_values = df_test_split['Pcor'].values[:len(predictions)]
 if len(real_values) > 0:
     mae = np.mean(np.abs(predictions - real_values))
     print(f"Test MAE: {mae:.4f}")

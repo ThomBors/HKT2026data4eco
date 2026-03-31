@@ -5,6 +5,7 @@ import numpy as np
 import random
 from collections import deque
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class DQN(nn.Module):
     def __init__(self, state_dim, action_dim):
@@ -20,19 +21,17 @@ class DQN(nn.Module):
     def forward(self, x):
         return self.net(x)
 
-
 class Agent:
     def __init__(self, state_dim, action_dim):
 
         self.state_dim = state_dim
         self.action_dim = action_dim
 
-        self.model = DQN(state_dim, action_dim)
-        self.target_model = DQN(state_dim, action_dim)
+        self.model = DQN(state_dim, action_dim).to(device)
+        self.target_model = DQN(state_dim, action_dim).to(device)
         self.target_model.load_state_dict(self.model.state_dict())
 
         self.optimizer = optim.Adam(self.model.parameters(), lr=1e-3)
-
         self.memory = deque(maxlen=10000)
 
         self.gamma = 0.99
@@ -45,8 +44,7 @@ class Agent:
     def act(self, state):
         if np.random.rand() < self.epsilon:
             return np.random.randint(self.action_dim)
-
-        state = torch.FloatTensor(state).unsqueeze(0)
+        state = torch.FloatTensor(state).unsqueeze(0).to(device)
         q_values = self.model(state)
         return torch.argmax(q_values).item()
 
@@ -58,14 +56,14 @@ class Agent:
             return
 
         batch = random.sample(self.memory, self.batch_size)
-
         states, actions, rewards, next_states, dones = zip(*batch)
 
-        states = torch.FloatTensor(states)
-        next_states = torch.FloatTensor(next_states)
-        actions = torch.LongTensor(actions)
-        rewards = torch.FloatTensor(rewards)
-        dones = torch.FloatTensor(dones)
+        # Convert to single NumPy array before tensor conversion
+        states = torch.FloatTensor(np.array(states)).to(device)
+        next_states = torch.FloatTensor(np.array(next_states)).to(device)
+        actions = torch.LongTensor(actions).to(device)
+        rewards = torch.FloatTensor(rewards).to(device)
+        dones = torch.FloatTensor(dones).to(device)
 
         q_values = self.model(states)
         q_value = q_values.gather(1, actions.unsqueeze(1)).squeeze()
@@ -82,6 +80,5 @@ class Agent:
 
         # update epsilon
         self.epsilon = max(self.epsilon * self.epsilon_decay, self.epsilon_min)
-
     def update_target(self):
         self.target_model.load_state_dict(self.model.state_dict())
