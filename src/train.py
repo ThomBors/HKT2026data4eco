@@ -28,7 +28,7 @@ def run_experiments(params=None, save_model=True, save_results=True, seed=42):
     params = DEFAULT_PARAMETERS.copy() if params is None else params
     params["max_steps"] = length
     params["output_size"] = horizon
-    params["epochs"] = 1000
+    params["epochs"] = 500
 
     torch.manual_seed(seed)
 

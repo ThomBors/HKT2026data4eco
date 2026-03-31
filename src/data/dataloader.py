@@ -18,12 +18,10 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
         return self.X[idx], self.Y[idx], self.sequence_lengths[idx]
 
     @staticmethod
-
     def get_raw_data(weather_path="data/weather_forecast.csv",
                     production_path="data/historical_data.csv"):
-        # -------------------------------
-        # 1️⃣ Load production data
-        # -------------------------------
+        
+        # Load production data
         df = pd.read_csv(production_path, sep=';')
         df = df.dropna(subset=['DateTime CET'])
         df['date'] = pd.to_datetime(df['DateTime CET'], format='%d/%m/%Y %H:%M', errors='coerce')
@@ -44,9 +42,7 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
 
         df.set_index('date', inplace=True)
 
-        # -------------------------------
-        # 2️⃣ Load weather data
-        # -------------------------------
+        # Load weather data
         dm = pd.read_csv(weather_path, sep=';', low_memory=False)
 
         # Melt wide to long
@@ -84,17 +80,14 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
             values='value'
         ).fillna(0)
 
-        # -------------------------------
-        # 3️⃣ Split into train/test based on production availability
-        # -------------------------------
-
+        # Split into train/test based on production availability
         train_index = df['Pcor'].dropna().index
         test_index = df['Pcor'].isna().index
 
         df_train = df.loc[train_index]
 
         df_weather_train = df_weather_wide.loc[train_index.intersection(df_weather_wide.index)]
-        df_weather_test = df_weather_wide[df_weather_wide.index >= "2025-06-30"]
+        df_weather_test = df_weather_wide[df_weather_wide.index >= "2025-07-01"]
        
 
         return df_train, df_weather_train, None, df_weather_test
@@ -103,16 +96,15 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
 def get_splits(
     length=100,
     horizon=50,
-    n_train=200,
+    n_train=1200,
     n_val=168,
     n_calibration=168,
     seed=None
 ):
     df, df_weather, _, df_weather_test = TimeSeriesDataset.get_raw_data()
 
-    # =========================
-    # 🔹 TRAIN / VAL / CAL DATA
-    # =========================
+
+    # TRAIN / VAL / CAL DATA
     X_raw = df_weather.values
     Y_raw = df['Pcor'].values.reshape(-1, 1)
 
@@ -127,18 +119,24 @@ def get_splits(
     val_idx = np.arange(n_train, n_train + n_val)
     cal_idx = np.arange(n_train + n_val, n_train + n_val + n_calibration)
 
-    # =========================
-    # 🔹 TEST DATA (NO TARGET)
-    # =========================
+
+    # TEST DATA (NO TARGET)
     X_test_raw = df_weather_test.values
 
-    n_test_samples = len(X_test_raw) - length + 1
-    X_test = np.array([X_test_raw[i:i+length] for i in range(n_test_samples)])
-    sequence_lengths_test = np.array([length] * n_test_samples)
+    n_test_samples = len(X_test_raw) 
 
-    # =========================
-    # 🔹 SCALING
-    # =========================
+    X_test_raw = df_weather_test.values  
+
+    pad = np.repeat(X_test_raw[0:1], length-1 , axis=0)
+    X_padded = np.concatenate([pad, X_test_raw], axis=0)
+
+    X_test = np.array([
+        X_padded[i:i+length] for i in range(n_test_samples)
+    ])
+
+    sequence_lengths_test = np.array([length] * n_test_samples)
+ 
+    # SCALING
     scaler = StandardScaler()
 
     # Fit ONLY on train
@@ -155,9 +153,8 @@ def get_splits(
     X_cal_scaled = scale(X[cal_idx])
     X_test_scaled = scale(X_test)
 
-    # =========================
-    # 🔹 DATASETS
-    # =========================
+
+    # DATASETS
     train_dataset = TimeSeriesDataset(
         torch.FloatTensor(X_train_scaled),
         torch.FloatTensor(Y[train_idx]),
