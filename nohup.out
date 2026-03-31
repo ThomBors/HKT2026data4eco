@@ -5,3 +5,37 @@
   return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
 /home/students/tborsani/HKT2026data4eco/myenv/lib/python3.12/site-packages/torch/nn/modules/loss.py:626: UserWarning: Using a target size (torch.Size([48, 1, 1])) that is different to the input size (torch.Size([48, 1, 125])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
   return F.mse_loss(input, target, reduction=self.reduction)
+/home/students/tborsani/HKT2026data4eco/src/model/cfrnn.py:282: UserWarning: The use of `x.T` on tensors of dimension other than 2 to reverse their shape is deprecated and it will throw an error in a future release. Consider `x.mT` to transpose batches of matrices or `x.permute(*torch.arange(x.ndim - 1, -1, -1))` to reverse the dimensions of a tensor. (Triggered internally at /pytorch/aten/src/ATen/native/TensorShape.cpp:4480.)
+  self.calibration_scores = torch.vstack(calibration_scores).T
+Training cfrnn
+Epoch: 0	Train loss: 13.702130031585693
+Epoch: 50	Train loss: 0.07592159695923328
+Epoch: 100	Train loss: 0.004936672188341618
+Epoch: 150	Train loss: 0.004787893663160503
+Epoch: 200	Train loss: 0.0034506206633523107
+Epoch: 250	Train loss: 0.001526390976505354
+Epoch: 300	Train loss: 0.0063497459050267935
+Epoch: 350	Train loss: 0.0005390422506025061
+Epoch: 400	Train loss: 0.014275479502975941
+Epoch: 450	Train loss: 1.2829396746383282e-05
+Saved to results/predictions.csv
+/home/students/tborsani/HKT2026data4eco/myenv/lib/python3.12/site-packages/torch/nn/modules/loss.py:626: UserWarning: Using a target size (torch.Size([128, 1, 1])) that is different to the input size (torch.Size([128, 1, 125])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return F.mse_loss(input, target, reduction=self.reduction)
+/home/students/tborsani/HKT2026data4eco/myenv/lib/python3.12/site-packages/torch/autograd/graph.py:869: UserWarning: CUDA initialization: The NVIDIA driver on your system is too old (found version 12060). Please update your GPU driver by downloading and installing a new version from the URL: http://www.nvidia.com/Download/index.aspx Alternatively, go to: https://pytorch.org to install a PyTorch version that has been compiled with your version of the CUDA driver. (Triggered internally at /pytorch/c10/cuda/CUDAFunctions.cpp:119.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+/home/students/tborsani/HKT2026data4eco/myenv/lib/python3.12/site-packages/torch/nn/modules/loss.py:626: UserWarning: Using a target size (torch.Size([98, 1, 1])) that is different to the input size (torch.Size([98, 1, 125])). This will likely lead to incorrect results due to broadcasting. Please ensure they have the same size.
+  return F.mse_loss(input, target, reduction=self.reduction)
+/home/students/tborsani/HKT2026data4eco/src/model/cfrnn.py:282: UserWarning: The use of `x.T` on tensors of dimension other than 2 to reverse their shape is deprecated and it will throw an error in a future release. Consider `x.mT` to transpose batches of matrices or `x.permute(*torch.arange(x.ndim - 1, -1, -1))` to reverse the dimensions of a tensor. (Triggered internally at /pytorch/aten/src/ATen/native/TensorShape.cpp:4480.)
+  self.calibration_scores = torch.vstack(calibration_scores).T
+Training cfrnn
+Epoch: 0	Train loss: 13.96423864364624
+Epoch: 50	Train loss: 0.06472560614347458
+Epoch: 100	Train loss: 0.004922624351456762
+Epoch: 150	Train loss: 0.003894551261328161
+Epoch: 200	Train loss: 0.002783832198474556
+Epoch: 250	Train loss: 0.0029156060656532643
+Epoch: 300	Train loss: 0.015778135601431133
+Epoch: 350	Train loss: 0.001037341560004279
+Epoch: 400	Train loss: 0.008427448477596045
+Epoch: 450	Train loss: 0.0009003775427117944
+Saved to results/predictions.csv

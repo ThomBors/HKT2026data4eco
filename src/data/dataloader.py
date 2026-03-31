@@ -96,7 +96,7 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
 def get_splits(
     length=100,
     horizon=50,
-    n_train=1200,
+    n_train=1250,
     n_val=168,
     n_calibration=168,
     seed=None
